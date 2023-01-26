@@ -173,7 +173,6 @@ fn copy_bsp(map_name: String) {
 
     let mut path_maps = furnace.path.clone();
     path_maps.pop();
-    path_maps.pop();
 
     let map = format!("{map_name}.bsp");
 
@@ -184,7 +183,10 @@ fn copy_bsp(map_name: String) {
         Err(err) => log::error!("failed to remove old bsp: {err}"),
     }
 
-    match fs::copy(furnace.path.join(&map), path_maps.join(map)) {
+    match fs::copy(
+        furnace.path.join(format!("Titanfall2/maps/{}", &map)),
+        path_maps.join(map),
+    ) {
         Ok(_) => log::info!("copied bsp to maps folder"),
         Err(err) => log::error!("failed to copy bsp to maps folder: {err}"),
     }
