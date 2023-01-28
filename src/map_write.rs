@@ -1,4 +1,4 @@
-use rrplug::log;
+use rrplug::{log, wrappers::vector::Vector3};
 use std::fs;
 
 use crate::FurnaceData;
@@ -48,7 +48,7 @@ pub fn write_furnace_brush_data(furnace: &mut FurnaceData, map: String) {
             let point1 = m.0.unwrap()[0];
             let point2 = m.0.unwrap()[1];
             format!(
-                "({},{},{}),({},{},{})\n",
+                "({},{},{});({},{},{})\n",
                 point1.x, point1.y, point1.z, point2.x, point2.y, point2.z
             )
         })
@@ -67,8 +67,44 @@ pub fn load_furnace_brush_data(furnace: &mut FurnaceData, map: String) {
 
     let path = furnace.path.join(format!("Titanfall2/maps/{map}.furnace"));
 
-    match fs::remove_file(path) {
-        Ok(_) => todo!(),
-        Err(err) => log::error!("failed to load furnace data: {err}"),
+    let furnace_string_data = match fs::read_to_string(path) {
+        Ok(s) => Some(s),
+        Err(err) => {
+            log::error!("failed to load furnace data: {err}");
+            None
+        }
+    };
+
+    furnace.meshes = if let Some(furnace_string_data) = furnace_string_data {
+        furnace_string_data
+            .split('\n')
+            .enumerate()
+            .map(|line| {
+                let points: Vec<Vector3> = line
+                    .1
+                    .split(';')
+                    .map(|point| {
+                        let p = point
+                            .split(',')
+                            .map(|cord| {
+                                let cord = cord.strip_suffix(')').unwrap_or(cord);
+                                let cord = cord.strip_prefix('(').unwrap_or(cord);
+                                cord.into()
+                            })
+                            .collect::<Vec<String>>();
+
+                        Vector3::from([
+                            p[0].parse().unwrap(),
+                            p[1].parse().unwrap(),
+                            p[2].parse().unwrap(),
+                        ])
+                    })
+                    .collect();
+
+                (Some([points[0], points[1]]), line.0 as u32)
+            })
+            .collect()
+    } else {
+        Vec::new()
     }
 }
