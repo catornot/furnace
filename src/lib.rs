@@ -5,10 +5,12 @@ use std::process::Command;
 use std::sync::Mutex;
 use std::{fs, thread};
 
+use map_write::write_furnace_brush_data;
 use mesh::{mesh_register_sqfunction, Mesh};
 
 use rrplug::prelude::*;
 use rrplug::wrappers::northstar::ScriptVmType;
+use rrplug::wrappers::vector::Vector3;
 use rrplug::{
     bindings::convar::FCVAR_GAMEDLL,
     concommand, sq_return_null, sqfunction,
@@ -21,10 +23,13 @@ use crate::map_write::write_map_file;
 mod map_write;
 mod mesh;
 
+type MeshId = u32;
+
 pub struct FurnaceData {
     pub path: PathBuf,
     pub path_compiler: PathBuf,
-    pub meshes: Vec<Mesh>,
+    pub brushes: Vec<Mesh>,
+    pub meshes: Vec<(Option<[Vector3; 2]>, MeshId)>,
     pub current_map: String,
 }
 
@@ -46,6 +51,7 @@ impl Plugin for FurnacePlugin {
         _ = FURNACE.set(Mutex::new(FurnaceData {
             path: PathBuf::from("C:/Program Files (x86)/Steam/steamapps/common/Titanfall2/R2Northstar/mods/cat_or_not.Furnace/mod/maps/compile/"),
             path_compiler: PathBuf::from("C:/Users/Alex/Desktop/apps/MRVN-radiant/remap.exe"),
+            brushes: Vec::new(),
             meshes: Vec::new(),
             current_map: "mp_default".into(),
         }));
@@ -89,9 +95,14 @@ impl Plugin for FurnacePlugin {
 
         let mut furnace = FURNACE.wait().lock().unwrap();
 
-        let map = format!("{}.map", &furnace.current_map);
+        let map_file = format!("{}.map", &furnace.current_map);
+        write_map_file(&mut furnace, map_file);
 
-        write_map_file(&mut furnace, map);
+        let map = furnace.current_map.to_owned();
+        write_furnace_brush_data(&mut furnace, map);
+
+        furnace.brushes.clear();
+        furnace.meshes.clear();
     }
 }
 
@@ -117,6 +128,7 @@ fn compile_map_callback(command: CCommandResult) {
     .clone();
 
     write_map_file(&mut furnace, format!("{map}.map"));
+    write_furnace_brush_data( &mut furnace, map.clone() );
 
     let compiler = &furnace.path_compiler;
     let basepath = furnace.path.clone();
