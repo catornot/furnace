@@ -1,9 +1,12 @@
 use std::fmt::Display;
 
-use rrplug::{prelude::*, sq_return_null, sqfunction, wrappers::vector::Vector3};
+use rrplug::{
+    wrappers::{
+        vector::Vector3,
+    },
+};
 
-use crate::{FURNACE, FurnaceData};
-
+#[derive(Debug)]
 pub struct Face {
     pub topconer: Vector3,
     pub anyconrer: Vector3,
@@ -29,6 +32,7 @@ impl Display for Face {
     }
 }
 
+#[derive(Debug)]
 pub struct Mesh {
     pub up: Face,
     pub down: Face,
@@ -57,26 +61,7 @@ brushDef
     }
 }
 
-pub fn mesh_register_sqfunction(plugin_data: &PluginData) {
-    _ = plugin_data.register_sq_functions(info_push_mesh);
-    _ = plugin_data.register_sq_functions(info_get_mesh);
-}
-
-#[sqfunction(VM=SERVER,ExportName=PushMesh)]
-pub fn push_mesh(point1: Vector3, point2: Vector3) {
-    let mut furnace = FURNACE.wait().lock().unwrap();
-
-    add_mesh( point1, point2, &mut furnace );
-
-    sq_return_null!()
-}
-
-#[sqfunction(VM=SERVER,ExportName=GetMesh)]
-pub fn get_mesh() {
-    sq_return_null!()
-}
-
-pub fn add_mesh( point1: Vector3,point2: Vector3, furnace: &mut FurnaceData ) {
+pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
     let point1 = Vector3::from([point1.x.round(), point1.y.round(), point1.z.round()]);
     let point2 = Vector3::from([point2.x.round(), point2.y.round(), point2.z.round()]);
 
@@ -136,18 +121,13 @@ pub fn add_mesh( point1: Vector3,point2: Vector3, furnace: &mut FurnaceData ) {
         bottomcorner: (max_x, max_y, min_z).into(),
         texture: "world/dev/dev_white_512".into(),
     };
-    
-    let index = furnace.meshes.len() as u32;
-    furnace
-        .meshes
-        .push((Some([point1, point2]), index));
 
-    furnace.brushes.push(Mesh {
+    Mesh {
         up,
         down,
         left,
         right,
         forward,
         backwards,
-    });
+    }
 }
