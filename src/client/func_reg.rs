@@ -1,4 +1,4 @@
-use rrplug::{prelude::*, sq_return_null, sqfunction};
+use rrplug::{prelude::*, sq_return_null, sqfunction, wrappers::northstar::ScriptVmType};
 
 use crate::{compile::compile_map, map_info::parse_furnace_data, FURNACE};
 
@@ -27,7 +27,7 @@ pub fn compile_map_from_raw_data(raw_data: String) {
         furnace.meshes = parse_furnace_data(raw_data.replace(".n.", "\n"));
     }
 
-    compile_map(false);
+    compile_map(ScriptVmType::Ui);
 
     sq_return_null!()
 }

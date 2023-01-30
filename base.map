@@ -127,5 +127,7 @@ brushDef
 // entity 7
 {
 "classname" "info_spawnpoint_titan"
-"origin" "-64 224 0"
+"origin" "-1504 19177 368"
+"radius" "100"
+"targetname" "info_spawnpoint_titan_1"
 }

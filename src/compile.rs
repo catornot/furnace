@@ -5,7 +5,7 @@ use rrplug::{prelude::*, wrappers::squirrel::call_sq_function};
 use std::process::Command;
 use std::{fs, thread};
 
-pub fn compile_map(is_server: bool) {
+pub fn compile_map(context: ScriptVmType) {
     let mut furnace = match FURNACE.wait().lock() {
         Ok(f) => f,
         Err(e) => {
@@ -56,13 +56,11 @@ pub fn compile_map(is_server: bool) {
                     log::info!("compilation finished {}", out.status);
                     copy_bsp(map);
 
-                    if is_server {
-                        call_sq_function(
-                            ScriptVmType::Server,
-                            "FurnaceCallBack_ComfirmedCompilationEnded",
-                            None,
-                        )
-                    }
+                    call_sq_function(
+                        context,
+                        "FurnaceCallBack_ComfirmedCompilationEnded",
+                        None,
+                    )
                 }
                 Err(err) => log::error!("compilation falied: command execution fail, {err:?}"),
             })

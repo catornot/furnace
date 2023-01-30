@@ -116,7 +116,7 @@ impl Plugin for FurnacePlugin {
 
 #[concommand]
 fn compile_map_callback(_command: CCommandResult) {
-    compile_map(true)
+    compile_map(ScriptVmType::Server)
 }
 
 entry!(FurnacePlugin);
