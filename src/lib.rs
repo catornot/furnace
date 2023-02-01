@@ -1,5 +1,6 @@
-#![allow(dead_code)]
+#![feature(int_roundings)]
 
+use std::fs::{create_dir, remove_dir};
 use std::path::PathBuf;
 
 use std::sync::Mutex;
@@ -60,13 +61,29 @@ impl Plugin for FurnacePlugin {
                 PathBuf::from(std::env::var("PATH_COMPILER").expect("how")),
             ),
             Err(err) => {
-                log::warn!("{err}; failed to load furnace.env reverting to default settings");
-                (
-                    PathBuf::from("C:/Program Files (x86)/Steam/steamapps/common/Titanfall2/R2Northstar/mods/cat_or_not.Furnace/mod/maps/compile/"),
-                    PathBuf::from("C:/Users/Alex/Desktop/apps/MRVN-radiant/remap.exe")
-                )
+                log::error!("{err}");
+                wait(1000);
+                panic!()
             }
         };
+
+        log::info!("path mod : {}", paths.0.display());
+        log::info!("path compiler : {}", paths.1.display());
+        
+        // for testing
+        #[cfg(debug_assertions)]
+        create_dir(paths.0.join("test")).unwrap_or_else(|err| {
+            log::error!("{err}");
+            wait(1000);
+            panic!()
+        });
+        
+        #[cfg(debug_assertions)]
+        remove_dir(paths.0.join("test")).unwrap_or_else(|err| {
+            log::error!("{err}");
+            wait(1000);
+            panic!()
+        });
 
         _ = FURNACE.set(Mutex::new(FurnaceData {
             path: paths.0,
@@ -76,6 +93,8 @@ impl Plugin for FurnacePlugin {
             current_map: "mp_default".into(),
             last_compiled: "mp_default".into(),
         }));
+
+        
     }
 
     fn main(&self) {}

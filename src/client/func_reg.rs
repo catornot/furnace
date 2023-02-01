@@ -1,4 +1,7 @@
-use rrplug::{prelude::*, sq_return_null, sqfunction, wrappers::northstar::ScriptVmType};
+use base64::{engine::general_purpose, Engine};
+use rrplug::{
+    prelude::*, sq_raise_error, sq_return_null, sqfunction, wrappers::northstar::ScriptVmType,
+};
 
 use crate::{compile::compile_map, map_info::parse_furnace_data, FURNACE};
 
@@ -22,9 +25,23 @@ pub fn compile_map_from_raw_data(raw_data: String) {
     {
         let mut furnace = FURNACE.wait().lock().unwrap();
 
-        log::info!("{raw_data}");
+        let byte_data = raw_data.as_bytes();
 
-        furnace.meshes = parse_furnace_data(raw_data.replace(".n.", "\n"));
+        let mut buf = Vec::new();
+        if let Err(err) = general_purpose::STANDARD_NO_PAD.decode_vec(byte_data, &mut buf) {
+            log::error!("failed to parse base64 data {err}");
+            sq_raise_error!(
+                format!("failed to parse base64 data {err}"),
+                sqvm,
+                sq_functions
+            );
+        }
+
+        let decoded = String::from_utf8_lossy(&buf).to_string();
+
+        log::info!("{decoded}");
+
+        furnace.meshes = parse_furnace_data(decoded);
     }
 
     compile_map(ScriptVmType::Ui);

@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 rrplug =  { path = "../rrplug" }
 dotenv = "0.15.0"
+base64 = "0.21.0"
 
 [build-dependencies]
 windres = "0.2.2"
