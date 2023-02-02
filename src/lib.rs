@@ -22,14 +22,18 @@ use rrplug::{
     OnceCell,
 };
 use server::func_reg::sever_register_sqfunction;
+use ui::window::init_window;
 
 use crate::map_info::write_map_file;
+use crate::ui::func_reg::ui_register_sqfunction;
+use crate::ui::{WindowGlobalData, WINDOW_GLOBAL_DATA};
 
 mod client;
 mod compile;
 mod map_info;
 mod mesh;
 mod server;
+mod ui;
 
 #[derive(Debug)]
 pub struct FurnaceData {
@@ -54,6 +58,7 @@ impl Plugin for FurnacePlugin {
     fn initialize(&mut self, plugin_data: &PluginData) {
         sever_register_sqfunction(plugin_data);
         client_register_sqfunction(plugin_data);
+        ui_register_sqfunction(plugin_data);
 
         let paths = match from_path("R2Northstar/plugins/furnace.env") {
             Ok(_) => (
@@ -69,7 +74,7 @@ impl Plugin for FurnacePlugin {
 
         log::info!("path mod : {}", paths.0.display());
         log::info!("path compiler : {}", paths.1.display());
-        
+
         // for testing
         #[cfg(debug_assertions)]
         create_dir(paths.0.join("test")).unwrap_or_else(|err| {
@@ -77,7 +82,7 @@ impl Plugin for FurnacePlugin {
             wait(1000);
             panic!()
         });
-        
+
         #[cfg(debug_assertions)]
         remove_dir(paths.0.join("test")).unwrap_or_else(|err| {
             log::error!("{err}");
@@ -94,10 +99,12 @@ impl Plugin for FurnacePlugin {
             last_compiled: "mp_default".into(),
         }));
 
-        
+        _ = WINDOW_GLOBAL_DATA.set(Mutex::new(WindowGlobalData::default()));
     }
 
-    fn main(&self) {}
+    fn main(&self) {
+        init_window()
+    }
 
     fn on_engine_load(&self, engine: EngineLoadType) {
         let engine = match engine {
