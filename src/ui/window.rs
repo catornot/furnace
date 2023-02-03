@@ -2,9 +2,7 @@ use eframe::{egui, epaint::Vec2, EventLoopBuilderHook, RequestRepaintEvent};
 use egui_winit::winit::{
     event_loop::EventLoopBuilder, platform::windows::EventLoopBuilderExtWindows,
 };
-use rrplug::{
-    wrappers::{northstar::ScriptVmType, squirrel::call_sq_function},
-};
+use rrplug::wrappers::{northstar::ScriptVmType, squirrel::call_sq_function};
 
 use super::WINDOW_GLOBAL_DATA;
 
@@ -37,12 +35,14 @@ pub fn init_window() {
 
 struct Window {
     grid: String,
+    eye_distance: String,
 }
 
 impl Window {
     fn new() -> Self {
         Self {
             grid: String::from("16"),
+            eye_distance: String::from("1000"),
         }
     }
 }
@@ -74,12 +74,29 @@ impl eframe::App for Window {
                 }
             });
 
+            ui.horizontal(|ui| {
+                ui.label("Eye Dis");
+                ui.text_edit_singleline(&mut self.eye_distance);
 
+                match self.eye_distance.parse::<f32>() {
+                    Ok(eye_distance) => {
+                        window_data.eye_distance = eye_distance;
+                    }
+                    Err(_) => _ = ui.small("this isn't a number :("),
+                }
+
+                if ui.button("Push").clicked() {
+                    call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewEyeDistance", None)
+                }
+            });
 
             if ui.button("Snap To Closest Node").clicked() {
                 call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_InstantSnap", None)
             }
-            
+
+            if ui.button("Create New Brush").clicked() {
+                call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", None)
+            }
         });
     }
     fn on_close_event(&mut self) -> bool {

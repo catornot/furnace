@@ -20,7 +20,7 @@ pub fn compile_map(context: ScriptVmType) {
 
     furnace.brushes = furnace
         .meshes
-        .iter_mut()
+        .iter()
         .filter_map(|m| m.as_ref())
         .map(|points| mesh_to_brush(points[0], points[1]))
         .collect();
@@ -29,8 +29,8 @@ pub fn compile_map(context: ScriptVmType) {
     write_furnace_brush_data(&furnace, map.clone());
 
     let compiler = &furnace.path_compiler;
-    let basepath = furnace.path.clone();
-    let path = furnace.path.join(format!("Titanfall2/maps/{map}.map"));
+    let basepath = &furnace.path;
+    let path = basepath.join(format!("Titanfall2/maps/{map}.map"));
 
     log::info!("compiling {map}");
 
@@ -56,13 +56,9 @@ pub fn compile_map(context: ScriptVmType) {
                     log::info!("compilation finished {}", out.status);
                     copy_bsp(map);
 
-                    call_sq_function(
-                        context,
-                        "FurnaceCallBack_ComfirmedCompilationEnded",
-                        None,
-                    )
+                    call_sq_function(context, "FurnaceCallBack_ComfirmedCompilationEnded", None)
                 }
-                Err(err) => log::error!("compilation falied: command execution fail, {err:?}"),
+                Err(err) => log::error!("compilation failed: command execution fail, {err:?}"),
             })
         }
         Err(err) => log::error!("compilation falied: command not sent, {err:?}"),
