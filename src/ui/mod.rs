@@ -8,6 +8,7 @@ pub static WINDOW_GLOBAL_DATA: OnceCell<Mutex<WindowGlobalData>> = OnceCell::new
 
 #[derive(Debug, Default)]
 pub struct WindowGlobalData {
-    grid: f32,
-    eye_distance: f32
+    pub grid: f32,
+    pub eye_distance: f32,
+    pub mesh_id: Option<i32>,
 }

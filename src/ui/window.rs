@@ -58,6 +58,8 @@ impl eframe::App for Window {
                 ui.small("I think this some sort of ui panel for furnace");
             });
 
+            ui.add_space(5.0);
+
             ui.horizontal(|ui| {
                 ui.label("Grid");
                 ui.text_edit_singleline(&mut self.grid);
@@ -97,6 +99,40 @@ impl eframe::App for Window {
             if ui.button("Create New Brush").clicked() {
                 call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", None)
             }
+
+            ui.add_space(5.0);
+
+            ui.add_visible_ui(window_data.mesh_id.is_some(), |ui| {
+                ui.collapsing(format!("mesh {}", window_data.mesh_id.unwrap_or_default()), |ui| {
+                    if ui.button("Delete").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", None)
+                    }
+
+                    if ui.button("Nudge +Z").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZUp", None)
+                    }
+
+                    if ui.button("Nudge -Z").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZDown", None)
+                    }
+
+                    if ui.button("Nudge +Y").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYUp", None)
+                    }
+
+                    if ui.button("Nudge -Y").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYDown", None)
+                    }
+
+                    if ui.button("Nudge +X").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXUp", None)
+                    }
+
+                    if ui.button("Nudge -X").clicked() {
+                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXDown", None)
+                    }
+                })
+            });
         });
     }
     fn on_close_event(&mut self) -> bool {
