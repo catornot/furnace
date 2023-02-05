@@ -6,9 +6,20 @@ pub mod window;
 
 pub static WINDOW_GLOBAL_DATA: OnceCell<Mutex<WindowGlobalData>> = OnceCell::new();
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct WindowGlobalData {
     pub grid: f32,
     pub eye_distance: f32,
+    pub nudge: f32,
     pub mesh_id: Option<i32>,
+}
+impl Default for WindowGlobalData {
+    fn default() -> Self {
+        Self {
+            grid: 16.0,
+            eye_distance: 1000.0,
+            nudge: 1.0,
+            mesh_id: Default::default(),
+        }
+    }
 }

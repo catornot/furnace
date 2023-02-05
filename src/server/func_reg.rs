@@ -13,14 +13,13 @@ pub fn sever_register_sqfunction(plugin_data: &PluginData) {
     _ = plugin_data.register_sq_functions(info_push_mesh);
     _ = plugin_data.register_sq_functions(info_get_meshes);
     _ = plugin_data.register_sq_functions(info_remove_mesh);
+    _ = plugin_data.register_sq_functions(info_move_mesh);
     _ = plugin_data.register_sq_functions(info_get_last_compiled_map);
     _ = plugin_data.register_sq_functions(info_get_furnace_data_base64);
 }
 
 #[sqfunction(VM=SERVER,ExportName=PushMapName)]
 fn push_map_name(map_name: String) {
-    log::info!("called push_map_name");
-
     let mut furnace = FURNACE.wait().lock().unwrap();
     furnace.current_map = map_name;
 
@@ -29,8 +28,6 @@ fn push_map_name(map_name: String) {
 
 #[sqfunction(VM=SERVER,ExportName=PushMesh)]
 pub fn push_mesh(point1: Vector3, point2: Vector3) -> i32 {
-    log::info!("called push_mesh");
-
     let mut furnace = FURNACE.wait().lock().unwrap();
 
     furnace.meshes.push(Some([point1, point2]));
@@ -44,8 +41,6 @@ pub fn push_mesh(point1: Vector3, point2: Vector3) -> i32 {
 
 #[sqfunction(VM=SERVER,ExportName=GetMeshes)]
 pub fn get_meshes(map: String) -> Vec<Vector3> {
-    log::info!("called get_meshes");
-
     let mut furnace = FURNACE.wait().lock().unwrap();
 
     load_furnace_brush_data(&mut furnace, map);
@@ -70,8 +65,6 @@ pub fn get_meshes(map: String) -> Vec<Vector3> {
 
 #[sqfunction(VM=SERVER,ExportName=RemoveMesh)]
 pub fn remove_mesh(index: i32) {
-    log::info!("called push_mesh");
-
     let mut furnace = FURNACE.wait().lock().unwrap();
 
     match furnace.meshes.get_mut(index as usize) {
@@ -82,22 +75,41 @@ pub fn remove_mesh(index: i32) {
     sq_return_null!()
 }
 
+#[sqfunction(VM=SERVER,ExportName=MoveMesh)]
+pub fn move_mesh(index: i32, dir: Vector3) -> i32 {
+    let mut furnace = FURNACE.wait().lock().unwrap();
+
+    match furnace.meshes.get_mut(index as usize) {
+        Some(mesh) => match mesh {
+            Some(mesh) => {
+                mesh[0] = mesh[0] + dir;
+                mesh[1] = mesh[1] + dir;
+            }
+            None => {
+                sq_return_int!(1, sqvm, sq_functions);
+            }
+        },
+        None => {
+            log::warn!("no mesh found");
+            sq_return_int!(1, sqvm, sq_functions);
+        }
+    }
+
+    sq_return_int!(0, sqvm, sq_functions);
+}
+
 #[sqfunction(VM=SERVER,ExportName=GetLastCompiledMap)]
 pub fn get_last_compiled_map() -> String {
-    log::info!("called push_mesh");
-
     let furnace = FURNACE.wait().lock().unwrap();
 
     sq_return_string!(furnace.last_compiled.clone(), sqvm, sq_functions);
 }
 
-// test command 
+// test command
 // script foreach( var f in GetFurnace64BaseData("mp_default") ) { printt( f, "\n" ) }
 #[sqfunction(VM=SERVER,ExportName=GetFurnace64BaseData)]
 pub fn get_furnace_data_base64(map: String) -> Vec<String> {
     const SLICE_LENGHT: usize = 100;
-
-    log::info!("called get_furnace_data_base64");
 
     let furnace = FURNACE.wait().lock().unwrap();
 
@@ -116,17 +128,21 @@ pub fn get_furnace_data_base64(map: String) -> Vec<String> {
 
     let max_slices = buf.len().div_ceil(SLICE_LENGHT);
 
+    log::info!( "max_slices : {max_slices}" );
+    log::info!( "todo debug when there are less than 100 chars of base64" );
+
     let furnace_slices: Vec<String> = (1..max_slices)
         .map(|index| {
             if index == max_slices.saturating_sub(1) {
-                buf[index.saturating_sub(1)*SLICE_LENGHT..].to_string()
+                buf[index.saturating_sub(1) * SLICE_LENGHT..].to_string()
             } else {
-                buf[index.saturating_sub(1)*SLICE_LENGHT..index*SLICE_LENGHT].to_string()
+                buf[index.saturating_sub(1) * SLICE_LENGHT..index * SLICE_LENGHT].to_string()
             }
         })
         .collect();
 
-    let push_closures = furnace_slices.into_iter()
+    let push_closures = furnace_slices
+        .into_iter()
         .map(|slice| {
             move |sqvm: *mut HSquirrelVM, sqfunctions: &SquirrelFunctionsUnwraped| {
                 push_sq_string(sqvm, sqfunctions, slice)

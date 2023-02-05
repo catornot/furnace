@@ -36,6 +36,7 @@ pub fn init_window() {
 struct Window {
     grid: String,
     eye_distance: String,
+    nudge: String,
 }
 
 impl Window {
@@ -43,6 +44,7 @@ impl Window {
         Self {
             grid: String::from("16"),
             eye_distance: String::from("1000"),
+            nudge: String::from("1"),
         }
     }
 }
@@ -107,6 +109,18 @@ impl eframe::App for Window {
                     if ui.button("Delete").clicked() {
                         call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", None)
                     }
+
+                    ui.horizontal(|ui| {
+                        ui.label("Nudge Amount");
+                        ui.text_edit_singleline(&mut self.nudge);
+        
+                        match self.nudge.parse::<f32>() {
+                            Ok(nudge) => {
+                                window_data.nudge = nudge;
+                            }
+                            Err(_) => _ = ui.small("this isn't a number :("),
+                        }
+                    });
 
                     if ui.button("Nudge +Z").clicked() {
                         call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZUp", None)
