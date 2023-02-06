@@ -8,9 +8,10 @@ use std::sync::Mutex;
 use client::func_reg::client_register_sqfunction;
 use compile::compile_map;
 use dotenv::from_path;
-use map_info::write_furnace_brush_data;
+use map_info::{write_furnace_brush_data, TEXTURE_MAP};
 use mesh::Mesh;
 
+use rrplug::bindings::convar::FCVAR_CLIENTDLL;
 use rrplug::prelude::*;
 use rrplug::wrappers::northstar::ScriptVmType;
 
@@ -41,6 +42,7 @@ pub struct FurnaceData {
     pub path_compiler: PathBuf,
     pub brushes: Vec<Mesh>,
     pub meshes: Vec<Option<[Vector3; 2]>>,
+    pub texture_map: Vec<String>,
     pub current_map: String,
     pub last_compiled: String,
 }
@@ -95,6 +97,7 @@ impl Plugin for FurnacePlugin {
             path_compiler: paths.1,
             brushes: Vec::new(),
             meshes: Vec::new(),
+            texture_map: Vec::new(),
             current_map: "mp_default".into(),
             last_compiled: "mp_default".into(),
         }));
@@ -120,6 +123,13 @@ impl Plugin for FurnacePlugin {
             "compiles the furnace map",
             FCVAR_GAMEDLL.try_into().unwrap(),
         );
+
+        _ = engine.register_concommand(
+            "dump_textures",
+            dump_textures_callback,
+            "gives all the shorthands of textures",
+            FCVAR_CLIENTDLL.try_into().unwrap(),
+        );
     }
 
     fn on_sqvm_destroyed(&self, context: northstar::ScriptVmType) {
@@ -143,6 +153,15 @@ impl Plugin for FurnacePlugin {
 #[concommand]
 fn compile_map_callback(_command: CCommandResult) {
     compile_map(ScriptVmType::Server)
+}
+
+#[concommand]
+fn dump_textures_callback(_command: CCommandResult) {
+    log::info!("List of textures!");
+
+    for (key, value) in TEXTURE_MAP.iter() {
+        log::info!("{key} : {value}")
+    }
 }
 
 entry!(FurnacePlugin);

@@ -1,10 +1,32 @@
+use once_cell::sync::Lazy;
 use rrplug::{log, wrappers::vector::Vector3};
-use std::fs;
+use std::{collections::HashMap, fs};
 
 use crate::FurnaceData;
 
 const BASE: &str = include_str!("../base.map");
 const BRUSH_START: u32 = 7;
+pub static TEXTURE_MAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
+    let mut texture_hash = HashMap::new();
+
+    _ = texture_hash.insert("$w", "world/dev/dev_white_512");
+    _ = texture_hash.insert("$g", "world/dev/dev_ground_512");
+    _ = texture_hash.insert("$r", "world/dev/dev_red_512");
+    _ = texture_hash.insert("$b", "world/dev/dev_blue_512");
+    _ = texture_hash.insert("$b", "world/dev/dev_blue_512");
+    _ = texture_hash.insert("$win", "world/windows");
+    _ = texture_hash.insert("$wood", "world/wood");
+    _ = texture_hash.insert("$c", "world/concrete");
+    _ = texture_hash.insert("$brick", "world/brick");
+
+    texture_hash
+});
+
+#[derive(Default)]
+pub struct FurnaceFileData {
+    pub meshes: Vec<Option<[Vector3; 2]>>,
+    pub texture_map: Vec<String>,
+}
 
 pub fn write_map_file(furnace: &FurnaceData, map_file: String) {
     if furnace.brushes.is_empty() {
@@ -58,9 +80,21 @@ pub fn write_furnace_brush_data(furnace: &FurnaceData, map: String) {
         })
         .collect();
 
+    let texture_data: String = furnace
+        .texture_map
+        .iter()
+        .map(|t| format!("{t}\n"))
+        .collect();
+
+    let furnace_format = format!(
+        "###Mesh##\n{}\n###Textures##\n{}",
+        mesh_data.trim_end().trim(),
+        texture_data.trim_end().trim()
+    );
+
     let path = furnace.path.join(format!("Titanfall2/maps/{map}.furnace"));
 
-    match fs::write(path, mesh_data.trim_end()) {
+    match fs::write(path, furnace_format) {
         Ok(_) => log::info!("created new furnace file"),
         Err(err) => log::error!("failed to create new furnace file: {err}"),
     }
@@ -71,39 +105,75 @@ pub fn load_furnace_brush_data(furnace: &mut FurnaceData, map: String) {
 
     let path = furnace.path.join(format!("Titanfall2/maps/{map}.furnace"));
 
-    furnace.meshes = match fs::read_to_string(path) {
+    let data = match fs::read_to_string(path) {
         Ok(s) => parse_furnace_data(s),
         Err(err) => {
             log::error!("failed to load furnace data: {err}");
-            Vec::new()
+            FurnaceFileData::default()
         }
     };
+
+    furnace.meshes = data.meshes;
+    furnace.texture_map = data.texture_map;
 }
 
-pub fn parse_furnace_data(data: String) -> Vec<Option<[Vector3; 2]>> {
-    data.split('\n')
-        .map(|line| {
-            let points: Vec<Vector3> = line
-                .split(';')
-                .map(|point| {
-                    let p = point
-                        .split(',')
-                        .map(|cord| {
-                            let cord = cord.strip_suffix(')').unwrap_or(cord);
-                            let cord = cord.strip_prefix('(').unwrap_or(cord);
-                            cord.into()
-                        })
-                        .collect::<Vec<String>>();
+pub fn parse_furnace_data(data: String) -> FurnaceFileData {
+    let info_chunks: HashMap<String, String> = HashMap::from_iter(data.split("###").map(|chunk| {
+        let mut split = chunk.split("##");
 
-                    Vector3::from([
-                        p[0].parse().unwrap(),
-                        p[1].parse().unwrap(),
-                        p[2].parse().unwrap(),
-                    ])
-                })
-                .collect();
+        let name = split.next().unwrap_or("ohno").to_owned();
+        let value = split.next().unwrap_or("ohno").trim_end().trim().to_owned();
 
-            Some([points[0], points[1]])
-        })
-        .collect()
+        (name, value)
+    }));
+
+    let meshes: Vec<Option<[Vector3; 2]>> = match info_chunks.get("Mesh") {
+        Some(data) => data
+            .split('\n')
+            .map(|line| {
+                let points: Vec<Vector3> = line
+                    .split(';')
+                    .map(|point| {
+                        let p = point
+                            .split(',')
+                            .map(|cord| {
+                                let cord = cord.strip_suffix(')').unwrap_or(cord);
+                                let cord = cord.strip_prefix('(').unwrap_or(cord);
+                                cord.into()
+                            })
+                            .collect::<Vec<String>>();
+
+                        Vector3::from([
+                            p[0].parse().unwrap(),
+                            p[1].parse().unwrap(),
+                            p[2].parse().unwrap(),
+                        ])
+                    })
+                    .collect();
+
+                Some([points[0], points[1]])
+            })
+            .collect(),
+        None => Vec::new(),
+    };
+
+    // so considering that we would have to allocate a strings for each mesh and brush
+    // arc might be a good idea XD
+
+    let textures: Vec<String> = match info_chunks.get("Textures") {
+        Some(data) => data.split('\n').map(|s| s.to_owned()).collect(),
+        None => Vec::new(),
+    };
+
+    FurnaceFileData {
+        meshes,
+        texture_map: textures,
+    }
+}
+
+pub fn get_path_texture(texture: String) -> String {
+    return match TEXTURE_MAP.get(&texture[..]) {
+        Some(t) => t.to_string(),
+        None => texture,
+    };
 }

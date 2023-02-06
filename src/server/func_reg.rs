@@ -16,6 +16,7 @@ pub fn sever_register_sqfunction(plugin_data: &PluginData) {
     _ = plugin_data.register_sq_functions(info_move_mesh);
     _ = plugin_data.register_sq_functions(info_get_last_compiled_map);
     _ = plugin_data.register_sq_functions(info_get_furnace_data_base64);
+    _ = plugin_data.register_sq_functions(info_set_texture_for_mesh);
 }
 
 #[sqfunction(VM=SERVER,ExportName=PushMapName)]
@@ -31,6 +32,7 @@ pub fn push_mesh(point1: Vector3, point2: Vector3) -> i32 {
     let mut furnace = FURNACE.wait().lock().unwrap();
 
     furnace.meshes.push(Some([point1, point2]));
+    furnace.texture_map.push("$w".into());
 
     sq_return_int!(
         furnace.meshes.len().saturating_sub(1) as i32,
@@ -98,6 +100,21 @@ pub fn move_mesh(index: i32, dir: Vector3) -> i32 {
     sq_return_int!(0, sqvm, sq_functions);
 }
 
+#[sqfunction(VM=SERVER,ExportName=SetTextureForMesh)]
+pub fn set_texture_for_mesh(index: i32, new_texture: String) -> i32 {
+    let mut furnace = FURNACE.wait().lock().unwrap();
+
+    match furnace.texture_map.get_mut(index as usize) {
+        Some(texture) => *texture = new_texture,
+        None => {
+            log::warn!("no texture found");
+            sq_return_int!(1, sqvm, sq_functions);
+        }
+    }
+
+    sq_return_int!(0, sqvm, sq_functions);
+}
+
 #[sqfunction(VM=SERVER,ExportName=GetLastCompiledMap)]
 pub fn get_last_compiled_map() -> String {
     let furnace = FURNACE.wait().lock().unwrap();
@@ -128,8 +145,8 @@ pub fn get_furnace_data_base64(map: String) -> Vec<String> {
 
     let max_slices = buf.len().div_ceil(SLICE_LENGHT);
 
-    log::info!( "max_slices : {max_slices}" );
-    log::info!( "todo debug when there are less than 100 chars of base64" );
+    log::info!("max_slices : {max_slices}");
+    log::info!("todo debug when there are less than 100 chars of base64");
 
     let furnace_slices: Vec<String> = (1..max_slices)
         .map(|index| {

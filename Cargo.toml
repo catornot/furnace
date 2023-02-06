@@ -9,6 +9,7 @@ edition = "2021"
 rrplug =  { path = "../rrplug" }
 dotenv = "0.15.0"
 base64 = "0.21.0"
+once_cell = "1.16.0"
 egui-winit = "0.20.1"
 eframe = { git = "https://github.com/catornot/egui.git", default-features = false, features = ["wgpu","default_fonts"] }
 

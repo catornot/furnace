@@ -767,6 +767,7 @@ dependencies = [
  "dotenv",
  "eframe",
  "egui-winit 0.20.1",
+ "once_cell",
  "rrplug",
  "windres",
 ]

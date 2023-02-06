@@ -1,10 +1,6 @@
 use std::fmt::Display;
 
-use rrplug::{
-    wrappers::{
-        vector::Vector3,
-    },
-};
+use rrplug::wrappers::vector::Vector3;
 
 #[derive(Debug)]
 pub struct Face {
@@ -61,7 +57,7 @@ brushDef
     }
 }
 
-pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
+pub fn mesh_to_brush(point1: Vector3, point2: Vector3, texture: String) -> Mesh {
     let point1 = Vector3::from([point1.x.round(), point1.y.round(), point1.z.round()]);
     let point2 = Vector3::from([point2.x.round(), point2.y.round(), point2.z.round()]);
 
@@ -79,7 +75,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (min_x, max_y, max_z).into(),
         anyconrer: (min_x, min_y, max_z).into(),
         bottomcorner: (min_x, min_y, min_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture: texture.clone(),
     };
 
     // ( 0 min_y max_z ) ( max_x min_y max_z ) ( max_x min_y 0 )
@@ -87,7 +83,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (min_x, min_y, max_z).into(),
         anyconrer: (max_x, min_y, max_z).into(),
         bottomcorner: (max_x, min_y, min_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture: texture.clone(),
     };
 
     // ( max_x 0 0 ) ( max_x max_y 0 ) ( 0 max_y 0 )
@@ -95,7 +91,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (max_x, min_y, min_z).into(),
         anyconrer: (max_x, max_y, min_z).into(),
         bottomcorner: (min_x, max_y, min_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture: texture.clone(),
     };
 
     // ( 0 max_y max_z ) ( max_x max_y max_z ) ( max_x 0 max_z )
@@ -103,7 +99,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (min_x, max_y, max_z).into(),
         anyconrer: (max_x, max_y, max_z).into(),
         bottomcorner: (max_x, min_y, max_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture: texture.clone(),
     };
 
     // ( max_x max_y 0 ) ( max_x max_y max_z ) ( 0 max_y max_z )
@@ -111,7 +107,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (max_x, max_y, min_z).into(),
         anyconrer: (max_x, max_y, max_z).into(),
         bottomcorner: (min_x, max_y, max_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture: texture.clone(),
     };
 
     // ( max_x 0 max_z ) ( max_x max_y max_z ) ( max_x max_y 0 )
@@ -119,7 +115,7 @@ pub fn mesh_to_brush(point1: Vector3, point2: Vector3) -> Mesh {
         topconer: (max_x, min_y, max_z).into(),
         anyconrer: (max_x, max_y, max_z).into(),
         bottomcorner: (max_x, max_y, min_z).into(),
-        texture: "world/dev/dev_white_512".into(),
+        texture,
     };
 
     Mesh {

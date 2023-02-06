@@ -1,4 +1,4 @@
-use crate::map_info::{write_furnace_brush_data, write_map_file};
+use crate::map_info::{get_path_texture, write_furnace_brush_data, write_map_file};
 use crate::{mesh::mesh_to_brush, FURNACE};
 use rrplug::wrappers::northstar::ScriptVmType;
 use rrplug::{prelude::*, wrappers::squirrel::call_sq_function};
@@ -22,7 +22,20 @@ pub fn compile_map(context: ScriptVmType) {
         .meshes
         .iter()
         .filter_map(|m| m.as_ref())
-        .map(|points| mesh_to_brush(points[0], points[1]))
+        .enumerate()
+        .map(|points| {
+            mesh_to_brush(
+                points.1[0],
+                points.1[1],
+                get_path_texture(
+                    furnace
+                        .texture_map
+                        .get(points.0)
+                        .unwrap_or(&"world/dev/dev_white_512".to_string())
+                        .to_owned(),
+                ),
+            )
+        })
         .collect();
 
     write_map_file(&furnace, format!("{map}.map"));

@@ -57,7 +57,9 @@ pub fn compile_map_from_raw_data(raw_data: String) {
 
         log::info!("{decoded}");
 
-        furnace.meshes = parse_furnace_data(decoded);
+        let data = parse_furnace_data(decoded);
+        furnace.meshes = data.meshes;
+        furnace.texture_map = data.texture_map;
     }
 
     compile_map(ScriptVmType::Ui);

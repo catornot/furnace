@@ -12,6 +12,7 @@ pub struct WindowGlobalData {
     pub eye_distance: f32,
     pub nudge: f32,
     pub mesh_id: Option<i32>,
+    pub texture: String
 }
 impl Default for WindowGlobalData {
     fn default() -> Self {
@@ -20,6 +21,7 @@ impl Default for WindowGlobalData {
             eye_distance: 1000.0,
             nudge: 1.0,
             mesh_id: Default::default(),
+            texture: String::from("$w"),
         }
     }
 }

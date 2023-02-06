@@ -2,7 +2,7 @@ use eframe::{egui, epaint::Vec2, EventLoopBuilderHook, RequestRepaintEvent};
 use egui_winit::winit::{
     event_loop::EventLoopBuilder, platform::windows::EventLoopBuilderExtWindows,
 };
-use rrplug::wrappers::{northstar::ScriptVmType, squirrel::call_sq_function};
+use rrplug::{wrappers::{northstar::ScriptVmType, squirrel::call_sq_function}};
 
 use super::WINDOW_GLOBAL_DATA;
 
@@ -53,7 +53,7 @@ impl eframe::App for Window {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             let mut window_data = WINDOW_GLOBAL_DATA.wait().lock().unwrap();
-
+            
             ui.centered(|ui| {
                 ui.heading("Furnace Editor");
                 ui.end_row();
@@ -109,6 +109,16 @@ impl eframe::App for Window {
                     if ui.button("Delete").clicked() {
                         call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", None)
                     }
+                    
+                    ui.small("textures are not networked; only the server knowns the true texture used");
+                    ui.horizontal(|ui| {
+                        ui.label("Texture");
+                        ui.text_edit_singleline(&mut window_data.texture);
+        
+                        if ui.button("Push").clicked() {
+                            call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewTexture", None );
+                        }
+                    });
 
                     ui.horizontal(|ui| {
                         ui.label("Nudge Amount");
