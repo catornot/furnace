@@ -101,6 +101,10 @@ impl eframe::App for Window {
             if ui.button("Create New Brush").clicked() {
                 call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", None)
             }
+            
+            if ui.button("Create New Brush ( 2 points )").clicked() {
+                call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrushStaged", None)
+            }
 
             ui.add_space(5.0);
 
