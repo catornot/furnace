@@ -1,7 +1,7 @@
 use crate::map_info::{get_path_texture, write_furnace_brush_data, write_map_file};
 use crate::{mesh::mesh_to_brush, FURNACE};
 use rrplug::wrappers::northstar::ScriptVmType;
-use rrplug::{prelude::*, wrappers::squirrel::call_sq_function};
+use rrplug::{prelude::*, wrappers::squirrel::async_call_sq_function};
 use std::process::Command;
 use std::{fs, thread};
 
@@ -69,7 +69,7 @@ pub fn compile_map(context: ScriptVmType) {
                     log::info!("compilation finished {}", out.status);
                     copy_bsp(map);
 
-                    call_sq_function(context, "FurnaceCallBack_ComfirmedCompilationEnded", None)
+                    async_call_sq_function(context, "FurnaceCallBack_ComfirmedCompilationEnded", None)
                 }
                 Err(err) => log::error!("compilation failed: command execution fail, {err:?}"),
             })

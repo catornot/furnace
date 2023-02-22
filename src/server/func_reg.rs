@@ -1,9 +1,8 @@
 use base64::{engine::general_purpose, Engine};
 use rrplug::{
-    bindings::{squirreldatatypes::HSquirrelVM, unwraped::SquirrelFunctionsUnwraped},
     prelude::*,
     sq_return_int, sq_return_notnull, sq_return_null, sq_return_string, sqfunction,
-    wrappers::squirrel::{push_sq_array, push_sq_string, push_sq_vector},
+    wrappers::squirrel::push_sq_array,
 };
 
 use crate::{map_info::load_furnace_brush_data, FURNACE};
@@ -47,20 +46,15 @@ pub fn get_meshes(map: String) -> Vec<Vector3> {
 
     load_furnace_brush_data(&mut furnace, map);
 
-    let push_closures = furnace
+    let push_array = furnace
         .meshes
         .clone()
         .into_iter()
         .flatten()
         .flatten()
-        .map(|vector| {
-            move |sqvm: *mut HSquirrelVM, sqfunctions: &SquirrelFunctionsUnwraped| {
-                push_sq_vector(sqvm, sqfunctions, vector)
-            }
-        })
         .collect();
 
-    push_sq_array(sqvm, sq_functions, push_closures);
+    push_sq_array(sqvm, sq_functions, push_array);
 
     sq_return_notnull!()
 }
@@ -158,16 +152,7 @@ pub fn get_furnace_data_base64(map: String) -> Vec<String> {
         })
         .collect();
 
-    let push_closures = furnace_slices
-        .into_iter()
-        .map(|slice| {
-            move |sqvm: *mut HSquirrelVM, sqfunctions: &SquirrelFunctionsUnwraped| {
-                push_sq_string(sqvm, sqfunctions, slice)
-            }
-        })
-        .collect();
-
-    push_sq_array(sqvm, sq_functions, push_closures);
+        push_sq_array(sqvm, sq_functions, furnace_slices);
 
     sq_return_notnull!()
 }

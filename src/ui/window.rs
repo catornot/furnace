@@ -2,7 +2,7 @@ use eframe::{egui, epaint::Vec2, EventLoopBuilderHook, RequestRepaintEvent};
 use egui_winit::winit::{
     event_loop::EventLoopBuilder, platform::windows::EventLoopBuilderExtWindows,
 };
-use rrplug::{wrappers::{northstar::ScriptVmType, squirrel::call_sq_function}};
+use rrplug::{wrappers::{northstar::ScriptVmType, squirrel::async_call_sq_function}};
 
 use super::WINDOW_GLOBAL_DATA;
 
@@ -74,7 +74,7 @@ impl eframe::App for Window {
                 }
 
                 if ui.button("Push").clicked() {
-                    call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewGrid", None)
+                    async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewGrid", None)
                 }
             });
 
@@ -90,20 +90,20 @@ impl eframe::App for Window {
                 }
 
                 if ui.button("Push").clicked() {
-                    call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewEyeDistance", None)
+                    async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewEyeDistance", None)
                 }
             });
 
             if ui.button("Snap To Closest Node").clicked() {
-                call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_InstantSnap", None)
+                async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_InstantSnap", None)
             }
 
             if ui.button("Create New Brush").clicked() {
-                call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", None)
+                async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", None)
             }
             
             if ui.button("Create New Brush ( 2 points )").clicked() {
-                call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrushStaged", None)
+                async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrushStaged", None)
             }
 
             ui.add_space(5.0);
@@ -111,7 +111,7 @@ impl eframe::App for Window {
             ui.add_visible_ui(window_data.mesh_id.is_some(), |ui| {
                 ui.collapsing(format!("mesh {}", window_data.mesh_id.unwrap_or_default()), |ui| {
                     if ui.button("Delete").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", None)
                     }
                     
                     ui.small("textures are not networked; only the server knowns the true texture used");
@@ -120,7 +120,7 @@ impl eframe::App for Window {
                         ui.text_edit_singleline(&mut window_data.texture);
         
                         if ui.button("Push").clicked() {
-                            call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewTexture", None );
+                            async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewTexture", None );
                         }
                     });
 
@@ -137,27 +137,27 @@ impl eframe::App for Window {
                     });
 
                     if ui.button("Nudge +Z").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZUp", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZUp", None)
                     }
 
                     if ui.button("Nudge -Z").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZDown", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeZDown", None)
                     }
 
                     if ui.button("Nudge +Y").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYUp", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYUp", None)
                     }
 
                     if ui.button("Nudge -Y").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYDown", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeYDown", None)
                     }
 
                     if ui.button("Nudge +X").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXUp", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXUp", None)
                     }
 
                     if ui.button("Nudge -X").clicked() {
-                        call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXDown", None)
+                        async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NudgeXDown", None)
                     }
                 })
             });
