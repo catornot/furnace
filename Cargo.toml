@@ -10,9 +10,9 @@ rrplug =  { path = "../rrplug" }
 dotenv = "0.15.0"
 base64 = "0.21.0"
 once_cell = "1.16.0"
-egui-winit = "0.20.1"
-eframe = { git = "https://github.com/catornot/egui.git", default-features = false, features = ["wgpu","default_fonts"] }
-
+# hudhook = "0.3.0"
+hudhook = { git = "https://github.com/catornot/hudhook.git" }
+imgui = "0.9.0"
 
 [build-dependencies]
 windres = "0.2.2"

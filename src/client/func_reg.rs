@@ -6,10 +6,10 @@ use rrplug::{
 use crate::{compile::compile_map, map_info::parse_furnace_data, FURNACE, ui::WINDOW_GLOBAL_DATA};
 
 pub fn client_register_sqfunction(plugin_data: &PluginData) {
-    _ = plugin_data.register_sq_functions(info_push_map_name_cl);
-    _ = plugin_data.register_sq_functions(info_compile_map_from_raw_data);
-    _ = plugin_data.register_sq_functions(info_push_mesh_index);
-    _ = plugin_data.register_sq_functions(info_push_remove_mesh_index);
+    plugin_data.register_sq_functions(info_push_map_name_cl).unwrap();
+    plugin_data.register_sq_functions(info_compile_map_from_raw_data).unwrap();
+    plugin_data.register_sq_functions(info_push_mesh_index).unwrap();
+    plugin_data.register_sq_functions(info_push_remove_mesh_index).unwrap();
 }
 
 #[sqfunction(VM=CLIENT,ExportName=ClientPushMapName)]
