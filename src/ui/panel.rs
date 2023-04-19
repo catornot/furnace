@@ -38,11 +38,12 @@ impl FurnacePanel {
 
 impl ImguiRenderLoop for FurnacePanel {
     fn render(&mut self, ui: &mut Ui, _flags: &ImguiRenderLoopFlags) {
-        ui.window("Funrace Editor")
+        ui.window("Furnace Editor")
             .collapsible(true)
-            .size([500., 400.], Condition::Always)
+            .resizable(true)
+            .size([600., 450.], Condition::FirstUseEver)
             .build(|| {
-                ui.set_window_font_scale(1.5);
+                ui.set_window_font_scale(1.6);
 
                 // ui.push_style_color(StyleCoor::WindowBg,[255.,255.,255.,30.]).pop();
                 // ui.push_style_color(StyleCololr::Border,[255.,255.,255.,30.]).pop();
@@ -56,7 +57,7 @@ impl ImguiRenderLoop for FurnacePanel {
 
                     ui.same_line();
 
-                    if ui.small_button("Push") {
+                    if ui.button("Push") {
                         async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewGrid", None)
                     }
                 });
@@ -66,7 +67,7 @@ impl ImguiRenderLoop for FurnacePanel {
 
                     ui.same_line();
 
-                    if ui.small_button("Push") {
+                    if ui.button("Push_") {
                         async_call_sq_function(
                             ScriptVmType::Ui,
                             "FurnaceCallBack_NewEyeDistance",
@@ -107,7 +108,7 @@ impl ImguiRenderLoop for FurnacePanel {
 
                                 ui.same_line();
 
-                                if ui.button("Push") {
+                                if ui.button("Push__") {
                                     async_call_sq_function(
                                         ScriptVmType::Ui,
                                         "FurnaceCallBack_NewTexture",

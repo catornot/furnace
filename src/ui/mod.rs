@@ -2,7 +2,7 @@ use rrplug::OnceCell;
 use std::sync::Mutex;
 
 pub mod func_reg;
-pub mod popup;
+pub mod panel;
 
 pub static WINDOW_GLOBAL_DATA: OnceCell<Mutex<WindowGlobalData>> = OnceCell::new();
 
