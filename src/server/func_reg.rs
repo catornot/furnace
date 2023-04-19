@@ -8,14 +8,14 @@ use rrplug::{
 use crate::{map_info::load_furnace_brush_data, FURNACE};
 
 pub fn sever_register_sqfunction(plugin_data: &PluginData) {
-    _ = plugin_data.register_sq_functions(info_push_map_name);
-    _ = plugin_data.register_sq_functions(info_push_mesh);
-    _ = plugin_data.register_sq_functions(info_get_meshes);
-    _ = plugin_data.register_sq_functions(info_remove_mesh);
-    _ = plugin_data.register_sq_functions(info_move_mesh);
-    _ = plugin_data.register_sq_functions(info_get_last_compiled_map);
-    _ = plugin_data.register_sq_functions(info_get_furnace_data_base64);
-    _ = plugin_data.register_sq_functions(info_set_texture_for_mesh);
+    plugin_data.register_sq_functions(info_push_map_name).unwrap();
+    plugin_data.register_sq_functions(info_push_mesh).unwrap();
+    plugin_data.register_sq_functions(info_get_meshes).unwrap();
+    plugin_data.register_sq_functions(info_remove_mesh).unwrap();
+    plugin_data.register_sq_functions(info_move_mesh).unwrap();
+    plugin_data.register_sq_functions(info_get_last_compiled_map).unwrap();
+    plugin_data.register_sq_functions(info_get_furnace_data_base64).unwrap();
+    plugin_data.register_sq_functions(info_set_texture_for_mesh).unwrap();
 }
 
 #[sqfunction(VM=SERVER,ExportName=PushMapName)]

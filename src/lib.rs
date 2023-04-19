@@ -1,4 +1,9 @@
-#![feature(int_roundings)]
+#![feature(
+    int_roundings,
+    once_cell,
+    // lazy_cell,
+    // once_cell_try
+)]
 
 use std::fs::{create_dir, remove_dir};
 use std::path::PathBuf;
@@ -23,7 +28,6 @@ use rrplug::{
     OnceCell,
 };
 use server::func_reg::sever_register_sqfunction;
-use ui::window::init_window;
 
 use crate::map_info::write_map_file;
 use crate::ui::func_reg::ui_register_sqfunction;
@@ -105,9 +109,7 @@ impl Plugin for FurnacePlugin {
         _ = WINDOW_GLOBAL_DATA.set(Mutex::new(WindowGlobalData::default()));
     }
 
-    fn main(&self) {
-        init_window()
-    }
+    fn main(&self) {}
 
     fn on_engine_load(&self, engine: EngineLoadType) {
         let engine = match engine {
