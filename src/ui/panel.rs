@@ -45,11 +45,6 @@ impl ImguiRenderLoop for FurnacePanel {
             .build(|| {
                 ui.set_window_font_scale(1.6);
 
-                // ui.push_style_color(StyleCoor::WindowBg,[255.,255.,255.,30.]).pop();
-                // ui.push_style_color(StyleCololr::Border,[255.,255.,255.,30.]).pop();
-
-
-
                 let mut window_data = WINDOW_GLOBAL_DATA.wait().lock().unwrap();
 
                 ui.group(|| {
