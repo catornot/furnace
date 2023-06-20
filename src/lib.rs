@@ -8,7 +8,7 @@
 use std::fs::{create_dir, remove_dir};
 use std::path::PathBuf;
 
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 
 use client::func_reg::client_register_sqfunction;
 use compile::compile_map;
@@ -46,7 +46,7 @@ pub struct FurnaceData {
     pub path_compiler: PathBuf,
     pub brushes: Vec<Mesh>,
     pub meshes: Vec<Option<[Vector3; 2]>>,
-    pub texture_map: Vec<String>,
+    pub texture_map: Vec<Arc<str>>,
     pub current_map: String,
     pub last_compiled: String,
 }
@@ -57,6 +57,8 @@ pub static FURNACE: OnceCell<Mutex<FurnaceData>> = OnceCell::new();
 pub struct FurnacePlugin;
 
 impl Plugin for FurnacePlugin {
+    type SaveType = squirrel::NoSave;
+
     fn new() -> Self {
         Self {}
     }
@@ -111,7 +113,7 @@ impl Plugin for FurnacePlugin {
 
     fn main(&self) {}
 
-    fn on_engine_load(&self, engine: EngineLoadType) {
+    fn on_engine_load(&self, engine: &EngineLoadType) {
         let engine = match engine {
             EngineLoadType::Engine(engine) => engine,
             EngineLoadType::EngineFailed => return,

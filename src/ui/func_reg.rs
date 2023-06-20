@@ -3,11 +3,11 @@ use rrplug::{prelude::*, sq_return_float, sqfunction, sq_return_int, sq_return_s
 use crate::ui::WINDOW_GLOBAL_DATA;
 
 pub fn ui_register_sqfunction(plugin_data: &PluginData) {
-    plugin_data.register_sq_functions(info_get_grid).unwrap();
-    plugin_data.register_sq_functions(info_get_eye_distance).unwrap();
-    plugin_data.register_sq_functions(info_get_current_mesh).unwrap();
-    plugin_data.register_sq_functions(info_get_nudge_value).unwrap();
-    plugin_data.register_sq_functions(info_get_texture).unwrap();
+    plugin_data.register_sq_functions(info_get_grid);
+    plugin_data.register_sq_functions(info_get_eye_distance);
+    plugin_data.register_sq_functions(info_get_current_mesh);
+    plugin_data.register_sq_functions(info_get_nudge_value);
+    plugin_data.register_sq_functions(info_get_texture);
 }
 
 #[sqfunction(VM=UI,ExportName=FurnaceGetGrid)]

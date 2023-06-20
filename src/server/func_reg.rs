@@ -8,14 +8,14 @@ use rrplug::{
 use crate::{map_info::load_furnace_brush_data, FURNACE};
 
 pub fn sever_register_sqfunction(plugin_data: &PluginData) {
-    plugin_data.register_sq_functions(info_push_map_name).unwrap();
-    plugin_data.register_sq_functions(info_push_mesh).unwrap();
-    plugin_data.register_sq_functions(info_get_meshes).unwrap();
-    plugin_data.register_sq_functions(info_remove_mesh).unwrap();
-    plugin_data.register_sq_functions(info_move_mesh).unwrap();
-    plugin_data.register_sq_functions(info_get_last_compiled_map).unwrap();
-    plugin_data.register_sq_functions(info_get_furnace_data_base64).unwrap();
-    plugin_data.register_sq_functions(info_set_texture_for_mesh).unwrap();
+    plugin_data.register_sq_functions(info_push_map_name);
+    plugin_data.register_sq_functions(info_push_mesh);
+    plugin_data.register_sq_functions(info_get_meshes);
+    plugin_data.register_sq_functions(info_remove_mesh);
+    plugin_data.register_sq_functions(info_move_mesh);
+    plugin_data.register_sq_functions(info_get_last_compiled_map);
+    plugin_data.register_sq_functions(info_get_furnace_data_base64);
+    plugin_data.register_sq_functions(info_set_texture_for_mesh);
 }
 
 #[sqfunction(VM=SERVER,ExportName=PushMapName)]
@@ -99,7 +99,7 @@ pub fn set_texture_for_mesh(index: i32, new_texture: String) -> i32 {
     let mut furnace = FURNACE.wait().lock().unwrap();
 
     match furnace.texture_map.get_mut(index as usize) {
-        Some(texture) => *texture = new_texture,
+        Some(texture) => *texture = new_texture.into(),
         None => {
             log::warn!("no texture found");
             sq_return_int!(1, sqvm, sq_functions);
