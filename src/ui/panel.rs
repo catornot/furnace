@@ -55,7 +55,7 @@ impl ImguiRenderLoop for FurnacePanel {
             .size([600., 450.], Condition::FirstUseEver)
             .build(|| {
                 ui.set_window_font_scale(1.6);
-
+              
                 let mut window_data = WINDOW_GLOBAL_DATA.wait().lock().unwrap();
 
                 ui.group(|| {
@@ -73,7 +73,7 @@ impl ImguiRenderLoop for FurnacePanel {
                     ui.input_float("Eye Dis", &mut window_data.eye_distance).build();
 
                     ui.same_line();
-
+                  
                     if ui.button("Push_") {                        
                         let eye_distance= window_data.eye_distance;
                         async_call_sq_function_macro!(
@@ -117,6 +117,7 @@ impl ImguiRenderLoop for FurnacePanel {
                                 ui.same_line();
 
                                 if ui.button("Push__") {
+                                  
                                 let texture = window_data.texture.clone();
                                 async_call_sq_function_macro!(
                                         ScriptVmType::Ui,
