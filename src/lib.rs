@@ -5,33 +5,24 @@
     // once_cell_try
 )]
 
-use std::fs::{create_dir, remove_dir};
-use std::path::PathBuf;
-
-use std::sync::{Mutex, Arc};
-
-use client::func_reg::client_register_sqfunction;
-use compile::compile_map;
 use dotenv::from_path;
-use map_info::{write_furnace_brush_data, TEXTURE_MAP};
-use mesh::Mesh;
-
-use rrplug::bindings::convar::FCVAR_CLIENTDLL;
+use once_cell::sync::OnceCell;
+use rrplug::bindings::cvar::convar::{FCVAR_CLIENTDLL, FCVAR_GAMEDLL};
 use rrplug::prelude::*;
-use rrplug::wrappers::northstar::ScriptVmType;
-
-use rrplug::wrappers::vector::Vector3;
-use rrplug::{
-    bindings::convar::FCVAR_GAMEDLL,
-    concommand,
-    wrappers::northstar::{EngineLoadType, PluginData},
-    OnceCell,
+use std::{
+    fs::{create_dir, remove_dir},
+    path::PathBuf,
+    sync::{Arc, Mutex},
 };
-use server::func_reg::sever_register_sqfunction;
 
-use crate::map_info::write_map_file;
-use crate::ui::func_reg::ui_register_sqfunction;
-use crate::ui::{WindowGlobalData, WINDOW_GLOBAL_DATA};
+use crate::{
+    client::func_reg::client_register_sqfunction,
+    compile::compile_map,
+    map_info::{write_furnace_brush_data, write_map_file, TEXTURE_MAP},
+    mesh::Mesh,
+    server::func_reg::sever_register_sqfunction,
+    ui::{func_reg::ui_register_sqfunction, WindowGlobalData, WINDOW_GLOBAL_DATA},
+};
 
 mod client;
 mod compile;
@@ -57,13 +48,7 @@ pub static FURNACE: OnceCell<Mutex<FurnaceData>> = OnceCell::new();
 pub struct FurnacePlugin;
 
 impl Plugin for FurnacePlugin {
-    type SaveType = squirrel::NoSave;
-
-    fn new() -> Self {
-        Self {}
-    }
-
-    fn initialize(&mut self, plugin_data: &PluginData) {
+    fn new(plugin_data: &PluginData) -> Self {
         sever_register_sqfunction(plugin_data);
         client_register_sqfunction(plugin_data);
         ui_register_sqfunction(plugin_data);
@@ -109,18 +94,14 @@ impl Plugin for FurnacePlugin {
         }));
 
         _ = WINDOW_GLOBAL_DATA.set(Mutex::new(WindowGlobalData::default()));
+
+        Self {}
     }
 
-    fn main(&self) {}
-
-    fn on_engine_load(&self, engine: &EngineLoadType) {
-        let engine = match engine {
-            EngineLoadType::Engine(engine) => engine,
-            EngineLoadType::EngineFailed => return,
-            EngineLoadType::Server => return,
-            EngineLoadType::Client => return,
+    fn on_dll_load(&self, engine_data: Option<&EngineData>, _dll_ptr: &DLLPointer) {
+        let Some(engine) = engine_data else {
+            return;
         };
-
         _ = engine.register_concommand(
             "compile_map",
             compile_map_callback,
@@ -136,7 +117,7 @@ impl Plugin for FurnacePlugin {
         );
     }
 
-    fn on_sqvm_destroyed(&self, context: northstar::ScriptVmType) {
+    fn on_sqvm_destroyed(&self, context: ScriptVmType) {
         if context != ScriptVmType::Server {
             return;
         }
@@ -154,13 +135,13 @@ impl Plugin for FurnacePlugin {
     }
 }
 
-#[concommand]
-fn compile_map_callback(_command: CCommandResult) {
+#[rrplug::concommand]
+fn compile_map_callback() {
     compile_map(ScriptVmType::Server)
 }
 
-#[concommand]
-fn dump_textures_callback(_command: CCommandResult) {
+#[rrplug::concommand]
+fn dump_textures_callback() {
     log::info!("List of textures!");
 
     for (key, value) in TEXTURE_MAP.iter() {

@@ -1,5 +1,5 @@
 use once_cell::sync::Lazy;
-use rrplug::{log, wrappers::vector::Vector3};
+use rrplug::prelude::*;
 use std::{collections::HashMap, fs, sync::Arc};
 
 use crate::FurnaceData;
@@ -171,7 +171,7 @@ pub fn parse_furnace_data(data: String) -> FurnaceFileData {
     }
 }
 
-pub fn get_path_texture(texture: &Arc<str> ) -> Arc<str> {
+pub fn get_path_texture(texture: &Arc<str>) -> Arc<str> {
     return match TEXTURE_MAP.get(&texture[..]) {
         Some(t) => t.clone(),
         None => texture.clone(),

@@ -1,6 +1,5 @@
-use std::{fmt::Display,sync::Arc};
-
-use rrplug::wrappers::vector::Vector3;
+use rrplug::prelude::*;
+use std::{fmt::Display, sync::Arc};
 
 #[derive(Debug)]
 pub struct Face {
