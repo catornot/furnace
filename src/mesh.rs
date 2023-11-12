@@ -1,13 +1,12 @@
-use std::fmt::Display;
-
-use rrplug::wrappers::vector::Vector3;
+use rrplug::prelude::*;
+use std::{fmt::Display, sync::Arc};
 
 #[derive(Debug)]
 pub struct Face {
     pub topconer: Vector3,
     pub anyconrer: Vector3,
     pub bottomcorner: Vector3,
-    pub texture: String,
+    pub texture: Arc<str>,
 }
 
 impl Display for Face {
@@ -57,7 +56,7 @@ brushDef
     }
 }
 
-pub fn mesh_to_brush(point1: Vector3, point2: Vector3, texture: String) -> Mesh {
+pub fn mesh_to_brush(point1: Vector3, point2: Vector3, texture: Arc<str>) -> Mesh {
     let point1 = Vector3::from([point1.x.round(), point1.y.round(), point1.z.round()]);
     let point2 = Vector3::from([point2.x.round(), point2.y.round(), point2.z.round()]);
 

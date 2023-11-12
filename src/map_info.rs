@@ -1,23 +1,23 @@
 use once_cell::sync::Lazy;
-use rrplug::{log, wrappers::vector::Vector3};
-use std::{collections::HashMap, fs};
+use rrplug::prelude::*;
+use std::{collections::HashMap, fs, sync::Arc};
 
 use crate::FurnaceData;
 
 const BASE: &str = include_str!("../base.map");
 const BRUSH_START: u32 = 7;
-pub static TEXTURE_MAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
+pub static TEXTURE_MAP: Lazy<HashMap<&'static str, Arc<str>>> = Lazy::new(|| {
     let mut texture_hash = HashMap::new();
 
-    _ = texture_hash.insert("$w", "world/dev/dev_white_512");
-    _ = texture_hash.insert("$g", "world/dev/dev_ground_512");
-    _ = texture_hash.insert("$r", "world/dev/dev_red_512");
-    _ = texture_hash.insert("$b", "world/dev/dev_blue_512");
-    _ = texture_hash.insert("$b", "world/dev/dev_blue_512");
-    _ = texture_hash.insert("$win", "world/windows");
-    _ = texture_hash.insert("$wood", "world/wood");
-    _ = texture_hash.insert("$c", "world/concrete");
-    _ = texture_hash.insert("$brick", "world/brick");
+    _ = texture_hash.insert("$w", "world/dev/dev_white_512".to_string().into());
+    _ = texture_hash.insert("$g", "world/dev/dev_ground_512".to_string().into());
+    _ = texture_hash.insert("$r", "world/dev/dev_red_512".to_string().into());
+    _ = texture_hash.insert("$b", "world/dev/dev_blue_512".to_string().into());
+    _ = texture_hash.insert("$b", "world/dev/dev_blue_512".to_string().into());
+    _ = texture_hash.insert("$win", "world/windows".to_string().into());
+    _ = texture_hash.insert("$wood", "world/wood".to_string().into());
+    _ = texture_hash.insert("$c", "world/concrete".to_string().into());
+    _ = texture_hash.insert("$brick", "world/brick".to_string().into());
 
     texture_hash
 });
@@ -25,7 +25,7 @@ pub static TEXTURE_MAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(||
 #[derive(Default)]
 pub struct FurnaceFileData {
     pub meshes: Vec<Option<[Vector3; 2]>>,
-    pub texture_map: Vec<String>,
+    pub texture_map: Vec<Arc<str>>,
 }
 
 pub fn write_map_file(furnace: &FurnaceData, map_file: String) {
@@ -167,13 +167,13 @@ pub fn parse_furnace_data(data: String) -> FurnaceFileData {
 
     FurnaceFileData {
         meshes,
-        texture_map: textures,
+        texture_map: textures.into_iter().map(|s| s.into()).collect(), // could be optimized later to remove the same textures
     }
 }
 
-pub fn get_path_texture(texture: String) -> String {
+pub fn get_path_texture(texture: &Arc<str>) -> Arc<str> {
     return match TEXTURE_MAP.get(&texture[..]) {
-        Some(t) => t.to_string(),
-        None => texture,
+        Some(t) => t.clone(),
+        None => texture.clone(),
     };
 }

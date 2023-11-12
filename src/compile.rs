@@ -1,9 +1,11 @@
 use crate::map_info::{get_path_texture, write_furnace_brush_data, write_map_file};
 use crate::{mesh::mesh_to_brush, FURNACE};
-use rrplug::wrappers::northstar::ScriptVmType;
-use rrplug::{prelude::*, wrappers::squirrel::async_call_sq_function};
-use std::process::Command;
-use std::{fs, thread};
+use once_cell::sync::Lazy;
+use rrplug::high::squirrel::async_call_sq_function;
+use rrplug::prelude::*;
+use std::{fs, process::Command, sync::Arc, thread};
+
+static DEFAULT_TEXTURE: Lazy<Arc<str>> = Lazy::new(|| "world/dev/dev_white_512".to_string().into());
 
 pub fn compile_map(context: ScriptVmType) {
     let mut furnace = match FURNACE.wait().lock() {
@@ -31,8 +33,7 @@ pub fn compile_map(context: ScriptVmType) {
                     furnace
                         .texture_map
                         .get(points.0)
-                        .unwrap_or(&"world/dev/dev_white_512".to_string())
-                        .to_owned(),
+                        .unwrap_or(&DEFAULT_TEXTURE),
                 ),
             )
         })
@@ -69,7 +70,11 @@ pub fn compile_map(context: ScriptVmType) {
                     log::info!("compilation finished {}", out.status);
                     copy_bsp(map);
 
-                    async_call_sq_function(context, "FurnaceCallBack_ComfirmedCompilationEnded", None)
+                    async_call_sq_function(
+                        context,
+                        "FurnaceCallBack_ComfirmedCompilationEnded",
+                        Some(|_, _| 0),
+                    )
                 }
                 Err(err) => log::error!("compilation failed: command execution fail, {err:?}"),
             })
