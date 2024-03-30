@@ -1,13 +1,13 @@
 use crate::map_info::{get_path_texture, write_furnace_brush_data, write_map_file};
 use crate::{mesh::mesh_to_brush, FURNACE};
 use once_cell::sync::Lazy;
-use rrplug::high::squirrel::async_call_sq_function;
+use rrplug::high::engine_sync::{async_execute, AsyncEngineMessage};
 use rrplug::prelude::*;
 use std::{fs, process::Command, sync::Arc, thread};
 
 static DEFAULT_TEXTURE: Lazy<Arc<str>> = Lazy::new(|| "world/dev/dev_white_512".to_string().into());
 
-pub fn compile_map(context: ScriptVmType) {
+pub fn compile_map(context: ScriptContext) {
     let mut furnace = match FURNACE.wait().lock() {
         Ok(f) => f,
         Err(e) => {
@@ -70,11 +70,11 @@ pub fn compile_map(context: ScriptVmType) {
                     log::info!("compilation finished {}", out.status);
                     copy_bsp(map);
 
-                    async_call_sq_function(
-                        context,
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
                         "FurnaceCallBack_ComfirmedCompilationEnded",
-                        Some(|_, _| 0),
-                    )
+                        context,
+                        (),
+                    ));
                 }
                 Err(err) => log::error!("compilation failed: command execution fail, {err:?}"),
             })

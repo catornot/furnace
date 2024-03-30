@@ -2,12 +2,12 @@ use rrplug::prelude::*;
 
 use crate::ui::WINDOW_GLOBAL_DATA;
 
-pub fn ui_register_sqfunction(plugin_data: &PluginData) {
-    plugin_data.register_sq_functions(get_grid);
-    plugin_data.register_sq_functions(get_eye_distance);
-    plugin_data.register_sq_functions(get_current_mesh);
-    plugin_data.register_sq_functions(get_nudge_value);
-    plugin_data.register_sq_functions(get_texture);
+pub fn ui_register_sqfunction() {
+    register_sq_functions(get_grid);
+    register_sq_functions(get_eye_distance);
+    register_sq_functions(get_current_mesh);
+    register_sq_functions(get_nudge_value);
+    register_sq_functions(get_texture);
 }
 
 #[rrplug::sqfunction(VM = "UI", ExportName = "FurnaceGetGrid")]

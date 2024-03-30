@@ -1,10 +1,8 @@
-use hudhook::hooks::{dx11::ImguiDx11Hooks, ImguiRenderLoop};
+use hudhook::hooks::dx11::ImguiDx11Hooks;
 use hudhook::*;
 use imgui::*;
+use rrplug::high::engine_sync::{async_execute, AsyncEngineMessage};
 use rrplug::prelude::*;
-use rrplug::{
-    async_call_sq_function as async_call_sq_function_macro, high::squirrel::async_call_sq_function,
-};
 
 use super::WINDOW_GLOBAL_DATA;
 
@@ -31,21 +29,26 @@ use super::WINDOW_GLOBAL_DATA;
 //     });
 // }
 
-hudhook!(FurnacePanel.into_hook::<ImguiDx11Hooks>());
+pub fn init_gui() {
+    static mut INIT: bool = false;
+
+    if unsafe { INIT } {
+        return;
+    }
+    unsafe { INIT = true };
+
+    if let Err(e) = Hudhook::builder()
+        .with(unsafe { Box::new(ImguiDx11Hooks::new(FurnacePanel)) })
+        // .with_hmodule(unsafe { windows::Win32::System::Threading::GetCurrentProcess() })
+        .build()
+        .apply()
+    {
+        log::error!("Couldn't apply hooks: {e:?}");
+    }
+}
 
 #[derive(Default)]
 struct FurnacePanel;
-
-#[inline(always)]
-fn alias<T: FnOnce(*mut HSquirrelVM, &'static SquirrelFunctionsUnwraped) -> i32>(
-    _: T,
-) -> Option<T> {
-    None
-}
-
-const fn alias_func(_: *mut HSquirrelVM, _: &'static SquirrelFunctionsUnwraped) -> i32 {
-    unimplemented!()
-}
 
 impl ImguiRenderLoop for FurnacePanel {
     fn render(&mut self, ui: &mut Ui) {
@@ -65,7 +68,11 @@ impl ImguiRenderLoop for FurnacePanel {
 
                     if ui.button("Push") {
                         let grid = window_data.grid;
-                        async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NewGrid", grid);                        
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NewGrid",
+                        ScriptContext::UI,
+                        grid,
+                    ));
                     }
                 });
 
@@ -76,24 +83,37 @@ impl ImguiRenderLoop for FurnacePanel {
                   
                     if ui.button("Push_") {                        
                         let eye_distance= window_data.eye_distance;
-                        async_call_sq_function_macro!(
-                            ScriptVmType::Ui,
-                            "FurnaceCallBack_NewEyeDistance",
-                            eye_distance
-                        )
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NewEyeDistance",
+                        ScriptContext::UI,
+                        eye_distance
+,
+                    ));
                     }
                 });
 
                 if ui.button("Snap To Closest Node") {
-                    async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_InstantSnap", alias(alias_func)   )
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_InstantSnap",
+                        ScriptContext::UI,
+                        (),
+                    ));
                 }
 
                 if ui.button("Create New Brush") {
-                    async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrush", alias(alias_func))
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NewBrush",
+                        ScriptContext::UI,
+                        (),
+                    ));
                 }
 
                 if ui.button("Create New Brush ( 2 points )") {
-                    async_call_sq_function(ScriptVmType::Ui, "FurnaceCallBack_NewBrushStaged", alias(alias_func))
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NewBrushStaged",
+                        ScriptContext::UI,
+                        (),
+                    ));
                 }
 
                 ui.separator();
@@ -104,7 +124,11 @@ impl ImguiRenderLoop for FurnacePanel {
                     ){
                             let mesh_id = window_data.mesh_id.unwrap_or_default();
                             if ui.button("Delete") {                                                    
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_DeleteMesh", mesh_id)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_DeleteMesh",
+                        ScriptContext::UI,
+                        mesh_id,
+                    ));
                             }
 
                             ui.text(
@@ -119,12 +143,11 @@ impl ImguiRenderLoop for FurnacePanel {
                                 if ui.button("Push__") {
                                   
                                 let texture = window_data.texture.clone();
-                                async_call_sq_function_macro!(
-                                        ScriptVmType::Ui,
-                                        "FurnaceCallBack_NewTexture",
-                                        mesh_id,
-                                        texture
-                                    );
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NewTexture",
+                        ScriptContext::UI,
+                        (mesh_id, texture)
+                    ));
                                 }
                             });
 
@@ -133,27 +156,51 @@ impl ImguiRenderLoop for FurnacePanel {
                             let nudge = window_data.nudge;
 
                             if ui.button("Nudge +Z") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeZUp", mesh_id, nudge)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeZUp",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
 
                             if ui.button("Nudge -Z") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeZDown", mesh_id, nudge)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeZDown",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
 
                             if ui.button("Nudge +Y") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeYUp", mesh_id, nudge)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeYUp",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
 
                             if ui.button("Nudge -Y") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeYDown", mesh_id, nudge)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeYDown",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
 
                             if ui.button("Nudge +X") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeXUp", mesh_id, nudge)
+                    _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeXUp",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
 
                             if ui.button("Nudge -X") {
-                                async_call_sq_function_macro!(ScriptVmType::Ui, "FurnaceCallBack_NudgeXDown", mesh_id, nudge)
+                    _ = _ = async_execute(AsyncEngineMessage::run_squirrel_func(
+                        "FurnaceCallBack_NudgeXDown",
+                        ScriptContext::UI,
+                        (mesh_id, nudge)
+                    ));
                             }
                         }
                 });

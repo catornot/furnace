@@ -1,3 +1,4 @@
+#![allow(clippy::format_collect)]
 use once_cell::sync::Lazy;
 use rrplug::prelude::*;
 use std::{collections::HashMap, fs, sync::Arc};

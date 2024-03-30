@@ -1,4 +1,4 @@
-use rrplug::OnceCell;
+use rrplug::exports::OnceCell;
 use std::sync::Mutex;
 
 pub mod func_reg;

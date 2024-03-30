@@ -3,15 +3,15 @@ use rrplug::prelude::*;
 
 use crate::{map_info::load_furnace_brush_data, FURNACE};
 
-pub fn sever_register_sqfunction(plugin_data: &PluginData) {
-    plugin_data.register_sq_functions(push_map_name);
-    plugin_data.register_sq_functions(push_mesh);
-    plugin_data.register_sq_functions(get_meshes);
-    plugin_data.register_sq_functions(remove_mesh);
-    plugin_data.register_sq_functions(move_mesh);
-    plugin_data.register_sq_functions(get_last_compiled_map);
-    plugin_data.register_sq_functions(get_furnace_data_base64);
-    plugin_data.register_sq_functions(set_texture_for_mesh);
+pub fn sever_register_sqfunction() {
+    register_sq_functions(push_map_name);
+    register_sq_functions(push_mesh);
+    register_sq_functions(get_meshes);
+    register_sq_functions(remove_mesh);
+    register_sq_functions(move_mesh);
+    register_sq_functions(get_last_compiled_map);
+    register_sq_functions(get_furnace_data_base64);
+    register_sq_functions(set_texture_for_mesh);
 }
 
 #[rrplug::sqfunction(VM = "SERVER", ExportName = "PushMapName")]

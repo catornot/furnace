@@ -3,11 +3,11 @@ use rrplug::prelude::*;
 
 use crate::{compile::compile_map, map_info::parse_furnace_data, ui::WINDOW_GLOBAL_DATA, FURNACE};
 
-pub fn client_register_sqfunction(plugin_data: &PluginData) {
-    plugin_data.register_sq_functions(push_map_name_cl);
-    plugin_data.register_sq_functions(compile_map_from_raw_data);
-    plugin_data.register_sq_functions(push_mesh_index);
-    plugin_data.register_sq_functions(push_remove_mesh_index);
+pub fn client_register_sqfunction() {
+    register_sq_functions(push_map_name_cl);
+    register_sq_functions(compile_map_from_raw_data);
+    register_sq_functions(push_mesh_index);
+    register_sq_functions(push_remove_mesh_index);
 }
 
 #[rrplug::sqfunction(VM = "CLIENT", ExportName = "ClientPushMapName")]
@@ -49,7 +49,7 @@ pub fn compile_map_from_raw_data(raw_data: String) -> Result<(), String> {
         furnace.texture_map = data.texture_map;
     }
 
-    compile_map(ScriptVmType::Ui);
+    compile_map(ScriptContext::UI);
 
     Ok(())
 }

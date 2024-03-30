@@ -48,10 +48,13 @@ pub static FURNACE: OnceCell<Mutex<FurnaceData>> = OnceCell::new();
 pub struct FurnacePlugin;
 
 impl Plugin for FurnacePlugin {
-    fn new(plugin_data: &PluginData) -> Self {
-        sever_register_sqfunction(plugin_data);
-        client_register_sqfunction(plugin_data);
-        ui_register_sqfunction(plugin_data);
+    const PLUGIN_INFO: PluginInfo =
+        PluginInfo::new(c"furnace", c"FURNACE:3", c"FURNACE", PluginContext::CLIENT);
+
+    fn new(_reloaded: bool) -> Self {
+        sever_register_sqfunction();
+        client_register_sqfunction();
+        ui_register_sqfunction();
 
         let paths = match from_path("R2Northstar/plugins/furnace.env") {
             Ok(_) => (
@@ -98,7 +101,12 @@ impl Plugin for FurnacePlugin {
         Self {}
     }
 
-    fn on_dll_load(&self, engine_data: Option<&EngineData>, _dll_ptr: &DLLPointer) {
+    fn on_dll_load(
+        &self,
+        engine_data: Option<&EngineData>,
+        _dll_ptr: &DLLPointer,
+        token: EngineToken,
+    ) {
         let Some(engine) = engine_data else {
             return;
         };
@@ -107,6 +115,7 @@ impl Plugin for FurnacePlugin {
             compile_map_callback,
             "compiles the furnace map",
             FCVAR_GAMEDLL.try_into().unwrap(),
+            token,
         );
 
         _ = engine.register_concommand(
@@ -114,11 +123,18 @@ impl Plugin for FurnacePlugin {
             dump_textures_callback,
             "gives all the shorthands of textures",
             FCVAR_CLIENTDLL.try_into().unwrap(),
+            token,
         );
     }
 
-    fn on_sqvm_destroyed(&self, context: ScriptVmType) {
-        if context != ScriptVmType::Server {
+    fn on_sqvm_created(&self, sqvm_handle: &CSquirrelVMHandle, _engine_token: EngineToken) {
+        if sqvm_handle.get_context() == ScriptContext::CLIENT {
+            ui::panel::init_gui();
+        }
+    }
+
+    fn on_sqvm_destroyed(&self, sqvm_handle: &CSquirrelVMHandle, _engine_token: EngineToken) {
+        if sqvm_handle.get_context() != ScriptContext::SERVER {
             return;
         }
 
@@ -137,7 +153,7 @@ impl Plugin for FurnacePlugin {
 
 #[rrplug::concommand]
 fn compile_map_callback() {
-    compile_map(ScriptVmType::Server)
+    compile_map(ScriptContext::SERVER)
 }
 
 #[rrplug::concommand]
