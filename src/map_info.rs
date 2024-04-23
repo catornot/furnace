@@ -19,6 +19,8 @@ pub static TEXTURE_MAP: Lazy<HashMap<&'static str, Arc<str>>> = Lazy::new(|| {
     _ = texture_hash.insert("$wood", "world/wood".to_string().into());
     _ = texture_hash.insert("$c", "world/concrete".to_string().into());
     _ = texture_hash.insert("$brick", "world/brick".to_string().into());
+    _ = texture_hash.insert("$nodraw", "tools/toolsnodraw".to_string().into());
+    _ = texture_hash.insert("$window", "tools/toolswindowhint".to_string().into());
 
     texture_hash
 });
